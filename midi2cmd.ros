@@ -1,0 +1,23 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#| <Put a one-line description here>
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp (ql:quickload '(:optima :cl-ppcre) :silent t)
+  )
+
+(defpackage :ros.script.midi2cmd.3725084751
+  (:use :cl))
+(in-package :ros.script.midi2cmd.3725084751)
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (loop for line = (read-line *standard-input* nil :eof)
+        until (eq line :eof)
+        do (let ((li line))
+             (setf line (cl-ppcre:regex-replace-all "\\d+:\\d+\\s+Control change\\s+(\\d)+, controller (\\d)+, value (\\d)+" line "VC,\\1,\\2,\\3"))
+             (setf line (cl-ppcre:regex-replace-all "\\d+:\\d+\\s+Note (on|off)\\s+(\\d)+, note (\\d)+, velocity (\\d)+" line "NT,\\1,\\2,\\3,\\4"))
+             (format t "~A~%" line))))
+;;; vim: set ft=lisp lisp:
